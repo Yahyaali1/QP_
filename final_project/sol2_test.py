@@ -208,7 +208,7 @@ class TestQuantumArithmetic(unittest.TestCase):
     # 9. Test times_two_power_mod
     def test_times_two_power_mod(self):
         """Test multiplication by power of 2 modulo N"""
-        n = 3  # Reduced n to save simulation time
+        n = 4  # Reduced n to save simulation time
         k = 2
 
         # Logic from proj2: aux_len = (k + 1) * n + (3*n + 2)
@@ -223,15 +223,18 @@ class TestQuantumArithmetic(unittest.TestCase):
 
         # N=5, A=2, k=2.
         # 2 * (2^2) = 8. 8 mod 5 = 3.
-        set_bits(qc, N, 5)
-        set_bits(qc, A, 2)
+
+        # N= 7, A= 3 , K= 2   = 5
+        #
+        set_bits(qc, N, 7)
+        set_bits(qc, A, 3)
 
         times_two_power_mod(qc, N, A, k, R, AUX)
 
         qc.measure(R, range(n))
         counts = self.get_counts(qc)
         measured = int(list(counts.keys())[0], 2)
-        self.assertEqual(measured, 3)
+        self.assertEqual(measured, 5)
 
     # 10. Test multiply_mod
     def test_multiply_mod(self):
