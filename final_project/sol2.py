@@ -7,7 +7,7 @@ from qiskit import QuantumCircuit
 from qiskit.circuit.library import MCXGate
 
 # Global variable to hold N_val for classical pre-computations in fixed multiplication
-N_val = None
+N_val = 7
 
 
 # --- 1.1 Initialization ---

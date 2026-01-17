@@ -4,6 +4,7 @@ Unit tests for quantum arithmetic operations
 
 import unittest
 from qiskit import QuantumCircuit, transpile
+from qiskit.transpiler import CouplingMap
 from qiskit_aer import AerSimulator
 
 # Importing functions. Assumes final_project package structure exists.
@@ -19,6 +20,20 @@ import final_project.quantum_arithmetic as qa_module
 
 
 class TestQuantumArithmetic(unittest.TestCase):
+    def get_counts_intense(self, qc):
+        simulator = AerSimulator(method="matrix_product_state")
+        nq = qc.num_qubits
+        coupling_map = CouplingMap.from_full(nq)
+
+        transpiled_circuit = transpile(
+            qc,
+            basis_gates=["u", "cx"],
+            coupling_map=coupling_map,
+            optimization_level=0
+        )
+
+        result = simulator.run(transpiled_circuit, shots=1024).result()
+        return result.get_counts()
 
     def get_counts(self, qc):
         """
@@ -239,7 +254,7 @@ class TestQuantumArithmetic(unittest.TestCase):
     # 10. Test multiply_mod
     def test_multiply_mod(self):
         """Test general modular multiplication"""
-        n = 3  # Reduce n to manage high qubit count
+        n = 4  # Reduce n to manage high qubit count
 
         # Logic from proj2: aux_len = 2*n*n + 8*n + 4
         aux_len = 2 * n * n + 8 * n + 4
@@ -261,14 +276,14 @@ class TestQuantumArithmetic(unittest.TestCase):
         multiply_mod(qc, N, A, B, R, AUX)
 
         qc.measure(R, range(n))
-        counts = self.get_counts(qc)
+        counts = self.get_counts_intense(qc)
         measured = int(list(counts.keys())[0], 2)
         self.assertEqual(measured, 5)
 
     # 11. Test multiply_mod_fixed
     def test_multiply_mod_fixed(self):
         """Test multiplication by fixed constant X"""
-        n = 3
+        n = 4
         N_val = 7
         X = 2
 
@@ -294,14 +309,14 @@ class TestQuantumArithmetic(unittest.TestCase):
         multiply_mod_fixed(qc, N, X, B, AUX)
 
         qc.measure(B, range(n))
-        counts = self.get_counts(qc)
+        counts = self.get_counts_intense(qc)
         measured = int(list(counts.keys())[0], 2)
         self.assertEqual(measured, 6)
 
     # 12. Test multiply_mod_fixed_power_2_k
     def test_multiply_mod_fixed_power_2_k(self):
         """Test multiplication by fixed X^(2^k)"""
-        n = 3
+        n = 4
         N_val = 7
         X = 3
         k = 1
@@ -328,14 +343,14 @@ class TestQuantumArithmetic(unittest.TestCase):
         multiply_mod_fixed_power_2_k(qc, N, X, B, AUX, k)
 
         qc.measure(B, range(n))
-        counts = self.get_counts(qc)
+        counts = self.get_counts_intense(qc)
         measured = int(list(counts.keys())[0], 2)
         self.assertEqual(measured, 6)
 
     # 13. Test multiply_mod_fixed_power_Y
     def test_multiply_mod_fixed_power_Y(self):
         """Test multiplication by fixed X^Y where Y is classical integer"""
-        n = 3
+        n = 4
         N_val = 7
         X = 3
         Y = 2  # 010 (binary)
@@ -366,7 +381,7 @@ class TestQuantumArithmetic(unittest.TestCase):
         multiply_mod_fixed_power_Y(qc, N, X, B, AUX, Y)
 
         qc.measure(B, range(n))
-        counts = self.get_counts(qc)
+        counts = self.get_counts_intense(qc)
         measured = int(list(counts.keys())[0], 2)
         self.assertEqual(measured, 6)
 
